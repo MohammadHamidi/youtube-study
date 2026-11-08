@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Study",
+  "version": "0.1.0",
+  "description": "Ask Claude Code to explain what you just heard on YouTube.",
+  "minimum_chrome_version": "123",
+  "permissions": ["sidePanel", "nativeMessaging", "scripting"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "action": { "default_title": "Open YouTube Study" },
+  "background": { "service_worker": "background.js" },
+  "side_panel": { "default_path": "panel.html" },
+  "content_scripts": [
+    { "matches": ["https://www.youtube.com/*"], "js": ["player.js"], "run_at": "document_idle" }
+  ]
+}

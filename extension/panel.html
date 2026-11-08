@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>YouTube Study</title>
+  <link rel="stylesheet" href="panel.css">
+  <script src="panel.js" defer></script>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">YOUTUBE STUDY</p>
+    <h1>Ask about this video</h1>
+    <p id="video-title">Open a YouTube video.</p>
+    <p id="player-state" class="badge">Waiting for player</p>
+  </header>
+  <form id="question-form">
+    <label for="question">Your question</label>
+    <textarea id="question" dir="auto" rows="3" maxlength="1600" required placeholder="What does “context window” mean here?"></textarea>
+    <button id="ask" type="submit" disabled>Ask Claude</button>
+  </form>
+  <section aria-label="Caption context">
+    <details>
+      <summary id="caption-summary">Caption context</summary>
+      <p id="captions" dir="auto">No nearby captions detected.</p>
+      <button id="transcript" class="secondary" type="button" disabled>Open YouTube transcript</button>
+    </details>
+    <details id="manual-details">
+      <summary>Paste subtitles or a quote</summary>
+      <textarea id="manual" aria-label="Subtitles or quote" dir="auto" rows="3" maxlength="4000"></textarea>
+    </details>
+    <p class="note">On Ask, the question and available context are sent through Claude Code.</p>
+  </section>
+  <p id="status" role="status"></p>
+  <section id="result" aria-label="Claude answer" hidden>
+    <h2>Explanation</h2>
+    <a id="anchor" target="_blank" rel="noopener"></a>
+    <p id="answer" dir="auto"></p>
+  </section>
+</body>
+</html>
