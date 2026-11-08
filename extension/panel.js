@@ -3,7 +3,8 @@
 const $ = (id) => document.getElementById(id);
 const { esc, ts, span: spanText } = window.YSMap;
 const HOST = "com.youtube_study.claude";
-const SETUP_CMD = `python3 bridge/install.py ${chrome.runtime.id}`;
+const PY = /\bWin/.test(navigator.platform || "") ? "python" : "python3";
+const SETUP_CMD = `${PY} bridge/install.py ${chrome.runtime.id}`;
 const WINDOW_SECONDS = 90;
 const Q_LIMIT = 1600;
 const QUOTE_LIMIT = 4000;
@@ -604,7 +605,7 @@ function onboardingHtml() {
       <div class="st"><span class="ic ok">${ICON.check}</span><div class="st-b"><b>Extension</b><small>Installed and ready</small></div></div>
       <div class="st"><span class="ic ${helperOk ? "ok" : "warn"}">${helperOk ? ICON.check : ICON.warn}</span>
         <div class="st-b"><b>Helper on this computer</b><small>${helperOk ? "Found and working" : "Not found yet"}</small>
-          ${helperOk ? "" : `<div class="st-x"><span style="font-size:13px;color:var(--text2)">Open Terminal in the YouTube Study folder, paste this and press Return.</span>${cmdHtml()}</div>`}
+          ${helperOk ? "" : `<div class="st-x"><span style="font-size:13px;color:var(--text2)">Open a terminal in the YouTube Study folder, paste this and press Return.</span>${cmdHtml()}</div>`}
         </div></div>
       <div class="st"><span class="ic ${claudeState}">${claudeState === "ok" ? ICON.check : claudeState === "warn" ? ICON.warn : '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"></circle></svg>'}</span>
         <div class="st-b"><b>Claude Code</b><small>${claudeState === "ok" ? "Found" : claudeState === "warn" ? "Not found. Install Claude Code, sign in, then run the command again." : "Waiting for step 2"}</small></div></div>
@@ -804,7 +805,7 @@ function errorHtml(t, retryAct = "retry") {
         <div class="err-h"><span class="ic err">${ICON.warn}</span>
           <div><b>YouTube Study's helper isn't set up on this computer yet.</b><p>Claude Code runs through a small helper here. One command installs it.</p></div></div>
         <ol class="ol">
-          <li><div><span>Open Terminal in the YouTube Study folder.</span></div></li>
+          <li><div><span>Open a terminal in the YouTube Study folder.</span></div></li>
           <li><div><span>Paste this and press Return.</span>${cmdHtml()}</div></li>
           <li><div><span>Come back here and try again.</span></div></li>
         </ol>

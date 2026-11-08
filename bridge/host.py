@@ -76,6 +76,15 @@ def write_reply(reply):
     sys.stdout.buffer.flush()
 
 
+def run_process(args, **kwargs):
+    program = str(args[0])
+    if sys.platform == "win32" and program.lower().endswith((".cmd", ".bat")):
+        # cmd.exe ends a command at a raw newline, so a .cmd shim gets one-line arguments.
+        flat = [" ".join(str(arg).split()) if any(ch in str(arg) for ch in "\r\n") else str(arg) for arg in args]
+        return subprocess.run(flat, shell=True, **kwargs)
+    return subprocess.run(args, **kwargs)
+
+
 def run_claude(claude, system_prompt, prompt, timeout):
     args = [
         claude, "-p", "--output-format", "json", "--safe-mode",
@@ -84,7 +93,7 @@ def run_claude(claude, system_prompt, prompt, timeout):
         "--no-session-persistence", "--system-prompt", system_prompt,
     ]
     with tempfile.TemporaryDirectory(prefix="youtube-study-") as workdir:
-        result = subprocess.run(
+        result = run_process(
             args, input=prompt, capture_output=True, encoding="utf-8",
             errors="replace", cwd=workdir, timeout=timeout, check=False,
         )
@@ -256,8 +265,17 @@ def handle(claude, request):
     raise ValueError("Unsupported bridge request.")
 
 
+def configure_stdio():
+    if sys.platform != "win32":
+        return
+    import msvcrt
+    msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
+
 def main():
     try:
+        configure_stdio()
         reply = handle(sys.argv[1], read_request(sys.stdin.buffer))
     except subprocess.TimeoutExpired:
         reply = {"ok": False, "code": "timeout", "error": "Claude Code took too long. Try again."}

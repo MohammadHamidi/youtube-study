@@ -14,14 +14,20 @@ spec.loader.exec_module(host)
 
 
 def fake_claude(folder, reply):
-    path = Path(folder) / "claude"
-    path.write_text(
-        "#!" + sys.executable + "\n"
+    body = (
         "import json, sys\n"
         "sys.stdin.read()\n"
-        f"print(json.dumps({{'result': {reply!r}}}))\n",
-        encoding="utf-8",
+        f"print(json.dumps({{'result': {reply!r}}}))\n"
     )
+    folder = Path(folder)
+    if sys.platform == "win32":
+        impl = folder / "claude_impl.py"
+        impl.write_text(body, encoding="utf-8")
+        path = folder / "claude.cmd"
+        path.write_text(f'@echo off\r\n"{sys.executable}" -u "{impl}" %*\r\n', encoding="ascii")
+        return str(path)
+    path = folder / "claude"
+    path.write_text("#!" + sys.executable + "\n" + body, encoding="utf-8")
     path.chmod(0o700)
     return str(path)
 
