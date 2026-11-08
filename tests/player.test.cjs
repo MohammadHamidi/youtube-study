@@ -74,3 +74,51 @@ test("captures player state and bounds context to the current video and playback
   assert.equal(context().videoId, "second");
   assert.deepEqual(context().cues.map((cue) => cue.text), ["Second video"]);
 });
+
+test("returns the whole transcript, moves the playhead and turns on captions", () => {
+  const media = { currentTime: 40, readyState: 4, duration: 600, paused: true, playbackRate: 1 };
+  let listener;
+  let pressed = "false";
+  let clicks = 0;
+  const node = (textContent) => ({ textContent, getClientRects: () => [1] });
+  const ccButton = { getAttribute: () => pressed, click: () => { clicks++; pressed = "true"; } };
+  const player = {
+    classList: { contains: () => false },
+    querySelector: (selector) => selector === ".ytp-subtitles-button" ? ccButton : media,
+    querySelectorAll: () => [],
+  };
+  const rows = [["0:05", "Hello"], ["1:10", "Tokens"], ["9:59", "Bye"]].map(([stamp, text]) => ({
+    ...node(""),
+    querySelector: (selector) => node(selector === ".segment-timestamp" ? stamp : text),
+  }));
+  const document = {
+    title: "Lesson - YouTube",
+    querySelector: (selector) => selector === "#movie_player" ? player : null,
+    querySelectorAll: () => rows,
+    addEventListener: () => {},
+  };
+  vm.runInNewContext(script, {
+    chrome: { runtime: { id: "ext", onMessage: { addListener: (fn) => { listener = fn; } } } },
+    document, location: { pathname: "/watch", search: "?v=vid" }, URLSearchParams, setInterval: () => {},
+    getComputedStyle: () => ({ visibility: "visible" }),
+  });
+  const send = (message) => {
+    let result;
+    listener(message, { id: "ext" }, (data) => { result = JSON.parse(JSON.stringify(data)); });
+    return result;
+  };
+  const full = send({ type: "study-full-transcript", videoId: "vid" });
+  assert.equal(full.title, "Lesson");
+  assert.equal(full.duration, 600);
+  assert.deepEqual(full.cues.map((cue) => cue.seconds), [5, 70, 599]);
+  assert.equal(send({ type: "study-full-transcript", videoId: "other" }), null);
+
+  assert.equal(send({ type: "study-seek", videoId: "vid", seconds: 130 }), true);
+  assert.equal(media.currentTime, 130);
+  assert.equal(send({ type: "study-seek", videoId: "other", seconds: 5 }), false);
+  assert.equal(media.currentTime, 130);
+
+  assert.equal(send({ type: "study-cc", videoId: "vid" }), true);
+  assert.equal(send({ type: "study-cc", videoId: "vid" }), true);
+  assert.equal(clicks, 1);
+});

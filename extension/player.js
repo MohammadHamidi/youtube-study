@@ -122,5 +122,41 @@
       transcriptButton?.click();
       respond(Boolean(transcriptButton));
     }
+    if (message.type === "study-full-transcript") {
+      syncVideo();
+      const media = video();
+      if (!matchesWatchPage() || message.videoId !== videoId || !media) {
+        respond(null);
+        return;
+      }
+      respond({
+        videoId,
+        title: clean(document.querySelector("ytd-watch-metadata h1")?.textContent
+          || document.title.replace(/ - YouTube$/, "")).slice(0, 300),
+        duration: Number.isFinite(media.duration) ? media.duration : null,
+        cues: transcript().slice(0, 8000)
+      });
+    }
+    if (message.type === "study-seek") {
+      syncVideo();
+      const media = video();
+      const seconds = Number(message.seconds);
+      if (!matchesWatchPage() || message.videoId !== videoId || !media || isAd() || !Number.isFinite(seconds)) {
+        respond(false);
+        return;
+      }
+      media.currentTime = Math.max(0, seconds);
+      respond(true);
+    }
+    if (message.type === "study-cc") {
+      syncVideo();
+      if (!matchesWatchPage() || message.videoId !== videoId) {
+        respond(false);
+        return;
+      }
+      const button = player()?.querySelector(".ytp-subtitles-button");
+      if (button && button.getAttribute("aria-pressed") !== "true") button.click();
+      respond(Boolean(button));
+    }
   });
 })();

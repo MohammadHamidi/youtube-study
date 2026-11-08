@@ -1,15 +1,48 @@
 {
   "manifest_version": 3,
   "name": "YouTube Study",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Ask Claude Code to explain what you just heard on YouTube.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6Pe4vAlqINFEGxpe07Xg13rObjd1Ofw2K0Ir7P/1ufT0DjnsHOBmoV2dNXExjVBnPJdy/hn+i9Wwzk7oN5I1gtwnmd1pk890P4LLV+tdGp1nyLVhzf3egUFt/TwXazVwgQ3zzDeydH96bBl61p/yFmJtGIPBD7i6fc/t76yg2oBBvA15zzzH7VghXb0lDaZ3JqVSKjqyD+kHrEatDtsAfaOcld5FrbAyI0lc/SFqTCSjj06wK9qJbz3VU3ulOqbHTNDkx1KzTv6WRjiAmbSwYzmIQ1ffkhV1hnGfXvyFDvK0LS+tecpH/ccm0/lR9XAX8NSOuWohDW65RFDz8LecTwIDAQAB",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "minimum_chrome_version": "123",
-  "permissions": ["sidePanel", "nativeMessaging", "scripting"],
-  "host_permissions": ["https://www.youtube.com/*"],
-  "action": { "default_title": "Open YouTube Study" },
-  "background": { "service_worker": "background.js" },
-  "side_panel": { "default_path": "panel.html" },
+  "permissions": [
+    "sidePanel",
+    "nativeMessaging",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*"
+  ],
+  "action": {
+    "default_title": "Open YouTube Study",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
   "content_scripts": [
-    { "matches": ["https://www.youtube.com/*"], "js": ["player.js"], "run_at": "document_idle" }
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "player.js"
+      ],
+      "run_at": "document_idle"
+    }
   ]
 }

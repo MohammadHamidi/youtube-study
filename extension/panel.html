@@ -5,37 +5,75 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>YouTube Study</title>
   <link rel="stylesheet" href="panel.css">
+  <script src="map-render.js" defer></script>
   <script src="panel.js" defer></script>
 </head>
-<body>
-  <header>
-    <p class="eyebrow">YOUTUBE STUDY</p>
-    <h1>Ask about this video</h1>
-    <p id="video-title">Open a YouTube video.</p>
-    <p id="player-state" class="badge">Waiting for player</p>
+<body class="p">
+  <header class="hd">
+    <svg width="28" height="28" viewBox="0 0 28 28" role="img" aria-label="YouTube Study"><rect width="28" height="28" rx="8" style="fill:var(--accent)"></rect><path d="M9.5 6h9A2.5 2.5 0 0 1 21 8.5v6a2.5 2.5 0 0 1-2.5 2.5H13l-3.6 3.2a.6.6 0 0 1-1-.45V17h1.1A2.5 2.5 0 0 1 7 14.5v-6A2.5 2.5 0 0 1 9.5 6z" style="fill:var(--on-accent)"></path><path d="M12.4 9.6v4.4l3.8-2.2z" style="fill:var(--accent)"></path></svg>
+    <div class="hd-t" id="brand">YouTube Study</div>
+    <div class="hd-t" id="tabs" hidden><div class="seg" role="group" aria-label="View"><button type="button" id="tab-ask" class="on" aria-pressed="true">Ask</button><button type="button" id="tab-map" aria-pressed="false">Map</button></div></div>
+    <button type="button" class="ib" id="history-btn" aria-label="Questions about this video" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg></button>
+    <button type="button" class="ib" id="privacy-btn" aria-label="Privacy: your question and captions are sent through Claude Code" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5M12 8h.01"></path></svg></button>
   </header>
-  <form id="question-form">
-    <label for="question">Your question</label>
-    <textarea id="question" dir="auto" rows="3" maxlength="1600" required placeholder="What does “context window” mean here?"></textarea>
-    <button id="ask" type="submit" disabled>Ask Claude</button>
+
+  <main class="body" id="main">
+    <div class="hint" id="privacy" hidden>
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      <span>Nothing leaves your computer until you press Ask. Then your question, the video title and time, and the nearby captions (or your pasted quote) go through your own Claude Code. Maps send the transcript the same way.</span>
+    </div>
+
+    <!-- Full moment card: shown before a question is asked -->
+    <section class="card mc" id="moment-full" aria-label="Current moment" hidden>
+      <div class="mc-row">
+        <div class="thumb" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" style="width:22px;height:22px"><rect x="3" y="5" width="18" height="14" rx="4"></rect><path d="M10.5 9.3v5.4l4.4-2.7z"></path></svg></div>
+        <div id="video-title" class="vt" dir="auto"></div>
+      </div>
+      <div id="player-state" class="ps"><span class="tm" id="time">0:00</span><span class="badge neutral" id="state-badge"><i class="dot"></i><span id="state-text">Paused</span></span></div>
+      <div id="meter-wrap">
+        <div class="meter" id="meter" aria-hidden="true"></div>
+        <div class="meter-l"><span class="mono" id="meter-start">0:00</span><span>what I'll read: the last 90 s</span><span class="mono" id="meter-end">0:00</span></div>
+      </div>
+      <div class="meter empty" id="meter-empty" style="height:38px" hidden>Nothing to read yet</div>
+      <button type="button" id="caption-summary" class="ctx load" aria-expanded="false" aria-controls="captions">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M10 10.2a2.4 2.4 0 1 0 0 3.6M16.5 10.2a2.4 2.4 0 1 0 0 3.6"></path></svg>
+        <span id="ctx-text">Checking for captions…</span>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6"></path></svg>
+      </button>
+      <ul id="captions" class="caps" hidden></ul>
+    </section>
+
+    <!-- Compact moment bar: shown once there is a thread, and on the map -->
+    <section class="card mcc" id="moment-compact" aria-label="Current moment" hidden>
+      <div class="ps" style="flex:none"><span class="tm sm" id="time-sm">0:00</span></div>
+      <div class="vt" id="title-sm" dir="auto"></div>
+      <button type="button" class="mini load" id="ctx-mini"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span id="ctx-mini-text">Checking…</span></button>
+    </section>
+
+    <div id="view-ask" class="view"></div>
+    <div id="view-map" class="view" hidden></div>
+    <div id="view-history" class="view" hidden></div>
+    <p id="status" class="sr" role="status" aria-live="polite"></p>
+  </main>
+
+  <form class="cmp" id="composer" aria-label="Ask a question">
+    <div class="cmp-ch" id="chips">
+      <span class="chip node" id="chip-node" hidden><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><rect x="3" y="4" width="8" height="6" rx="2"></rect><rect x="13" y="14" width="8" height="6" rx="2"></rect><path d="M7 10v4a2 2 0 0 0 2 2h4"></path></svg><span id="chip-node-name"></span> <span class="mono" id="chip-node-time" style="font-weight:400;color:var(--text2)"></span><button type="button" class="x" id="chip-node-x" aria-label="Stop asking about this part"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+      <span class="chip mom" id="chip-mom"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><path d="M8 5.5v13l11-6.5z"></path></svg><span class="mono" id="chip-mom-time">0:00</span> · <span id="chip-mom-note">locks when you ask</span></span>
+      <span class="chip load" id="chip-ctx">Checking captions…</span>
+    </div>
+    <label for="question" class="sr">Your question</label>
+    <textarea id="question" dir="auto" rows="2" maxlength="1600" placeholder="What does “context window” mean here?"></textarea>
+    <div class="cmp-r">
+      <div class="seg" role="group" aria-label="Answer format"><button type="button" id="fmt-diagram" class="on" aria-pressed="true">Text + diagram</button><button type="button" id="fmt-text" aria-pressed="false">Text</button></div>
+      <span class="cmp-sp"></span>
+      <span class="cnt" id="q-count" hidden></span>
+      <button id="ask" class="send" type="submit" aria-label="Ask" disabled><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;stroke-width:2"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+    </div>
+    <p class="reason" id="reason" hidden><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5M12 8h.01"></path></svg><span id="reason-text"></span></p>
+    <p class="fine"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span>Enter to ask · Shift+Enter for a new line. Your question and the captions go through Claude Code.</span></p>
   </form>
-  <section aria-label="Caption context">
-    <details>
-      <summary id="caption-summary">Caption context</summary>
-      <p id="captions" dir="auto">No nearby captions detected.</p>
-      <button id="transcript" class="secondary" type="button" disabled>Open YouTube transcript</button>
-    </details>
-    <details id="manual-details">
-      <summary>Paste subtitles or a quote</summary>
-      <textarea id="manual" aria-label="Subtitles or quote" dir="auto" rows="3" maxlength="4000"></textarea>
-    </details>
-    <p class="note">On Ask, the question and available context are sent through Claude Code.</p>
-  </section>
-  <p id="status" role="status"></p>
-  <section id="result" aria-label="Claude answer" hidden>
-    <h2>Explanation</h2>
-    <a id="anchor" target="_blank" rel="noopener"></a>
-    <p id="answer" dir="auto"></p>
-  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Video map · YouTube Study</title>
+  <link rel="stylesheet" href="panel.css">
+  <style>
+    body.fm{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,sans-serif;font-size:14px}
+    .fm *{box-sizing:border-box}
+    .fm button{font:inherit;color:inherit;cursor:pointer}
+    .fm :focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+    .fm svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+    .fm .mono{font-family:ui-monospace,"SF Mono",Consolas,monospace;direction:ltr;unicode-bidi:isolate}
+    .fm-h{flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px}
+    .fm-h h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+    .fm-h .sub{color:var(--text3);font-size:13px}
+    .fm-h .sp{flex:1}
+    .fm-main{flex:1;min-height:0;display:flex;gap:16px;padding:0 20px 16px}
+    .fm-canvas{flex:1;min-width:0;border-radius:18px;overflow:auto;background-color:var(--well);background-image:radial-gradient(rgba(var(--ink),.14) 1px,transparent 1px);background-size:16px 16px;display:flex;justify-content:center;align-items:flex-start;padding:24px}
+    .fm-canvas svg{flex:none;transform-origin:top center}
+    .fm-side{flex:none;width:320px;display:flex;flex-direction:column;gap:12px}
+    .fm-side .nsheet{padding:16px}
+    .fm-tl{flex:none;padding:0 20px 20px}
+    .tl{position:relative;display:flex;height:28px;border-radius:10px;overflow:hidden;background:rgba(var(--ink),.06)}
+    .tl button{border:0;padding:0;height:100%;border-inline-end:2px solid var(--bg);opacity:.75}
+    .tl button:hover,.tl button.sel{opacity:1}
+    .tl .ph{position:absolute;top:-3px;bottom:-3px;width:3px;border-radius:2px;background:var(--text);box-shadow:0 0 0 2px var(--bg);pointer-events:none}
+    .tl-l{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--text3)}
+    .empty-fm{margin:auto;max-width:28rem;text-align:center;color:var(--text2);line-height:1.6;padding:40px}
+    @media (max-width:760px){.fm-main{flex-direction:column}.fm-side{width:auto}}
+  </style>
+  <script src="map-render.js" defer></script>
+  <script src="map.js" defer></script>
+</head>
+<body class="fm">
+  <header class="fm-h">
+    <svg width="28" height="28" viewBox="0 0 28 28" role="img" aria-label="YouTube Study"><rect width="28" height="28" rx="8" style="fill:var(--accent)"></rect><path d="M9.5 6h9A2.5 2.5 0 0 1 21 8.5v6a2.5 2.5 0 0 1-2.5 2.5H13l-3.6 3.2a.6.6 0 0 1-1-.45V17h1.1A2.5 2.5 0 0 1 7 14.5v-6A2.5 2.5 0 0 1 9.5 6z" style="fill:var(--on-accent)"></path><path d="M12.4 9.6v4.4l3.8-2.2z" style="fill:var(--accent)"></path></svg>
+    <div><h1>Video map</h1><div class="sub" id="sub" dir="auto"></div></div>
+    <span class="sp"></span>
+    <button type="button" class="fol" id="follow" aria-pressed="true"><i class="dot"></i>Following</button>
+    <button type="button" class="btn" id="fit">Fit</button>
+    <div class="seg" role="group" aria-label="Zoom"><button type="button" id="zoom-out" aria-label="Zoom out">−</button><button type="button" id="zoom-in" aria-label="Zoom in">+</button></div>
+  </header>
+  <main class="fm-main">
+    <div class="fm-canvas" id="canvas"></div>
+    <aside class="fm-side" id="side" aria-live="polite"></aside>
+  </main>
+  <footer class="fm-tl">
+    <div class="tl" id="timeline" role="group" aria-label="Parts along the video"></div>
+    <div class="tl-l"><span class="mono">0:00</span><span id="tl-now"></span><span class="mono" id="tl-end"></span></div>
+  </footer>
+</body>
+</html>

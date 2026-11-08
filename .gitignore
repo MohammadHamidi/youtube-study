@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Local-only files
+__pycache__/
+.DS_Store
+floorplan/
+CLAUDE.local.md
